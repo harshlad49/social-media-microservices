@@ -1,64 +1,80 @@
-version: '3.8'
+version: "3.8"
 
 services:
   api-gateway:
     build: ./api-gateway
     ports:
       - "3000:3000"
-    env_file: ./api-gateway/.env
-    depends_on:
-      -redis
-      -rebbitmq
+    env_file:
+      - ./api-gateway/.env
     environment:
-      - REDIS_URL=redis://redis:6379
-      - RABBITMQ_URL=amqp://rebbitmq:5672
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://rabbitmq:5672
+    depends_on:
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+
   identity-service:
-    build: ./identity-service 
-    env_file: ./identity-service/.env
-    depends_on:
-      -redis
-      -rebbitmq
+    build: ./identity-service
+    env_file:
+      - ./identity-service/.env
     environment:
-      - REDIS_URL=redis://redis:6379
-      - RABBITMQ_URL=amqp://rebbitmq:5672
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://rabbitmq:5672
+    depends_on:
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+
   post-service:
-    build: ./post-service 
-    env_file: ./post-service/.env
-    depends_on:
-      -redis
-      -rebbitmq
+    build: ./post-service
+    env_file:
+      - ./post-service/.env
     environment:
-    - REDIS_URL=redis://redis:6379
-     - RABBITMQ_URL=amqp://rebbitmq:5672
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://rabbitmq:5672
+    depends_on:
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+
   media-service:
     build: ./media-service
-    env_file: ./media-service/.env
-  depends_on:
-     -redis
-     -rebbitmq
-  environment:
-     - REDIS_URL=redis://redis:6379
-     - RABBITMQ_URL=amqp://rebbitmq:5672
-  search-service:
-    build: ./search-service 
-    env_file: ./search-service/.env
-    depends_on:
-      -redis
-      -rebbitmq
+    env_file:
+      - ./media-service/.env
     environment:
-      - REDIS_URL=redis://redis:6379
-      - RABBITMQ_URL=amqp://rebbitmq:5672
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://rabbitmq:5672
+    depends_on:
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+
+  search-service:
+    build: ./search-service
+    env_file:
+      - ./search-service/.env
+    environment:
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://rabbitmq:5672
+    depends_on:
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+
   redis:
-    image: "redis:alpine"
+    image: redis:alpine
     ports:
       - "6379:6379"
-  rebbitmq:
-    image: "rabbitmq:3-management"
+
+  rabbitmq:
+    image: rabbitmq:3-management
     ports:
       - "5672:5672"
       - "15672:15672"
-    healthcheck:
-      test: ["CMD", "rebbitmq-diagnostics", "-q", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
